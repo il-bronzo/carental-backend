@@ -15,7 +15,7 @@ router.get("/:id", (req, res, next) => {
     const { id } = req.params;
     Car.findById(id)
     .then(car => {
-        if (!car) return res.status(404).json({ message: "Auto non trovata" });
+        if (!car) return res.status(404).json({ message: "Car not found!" });
       res.json(car);
     })
     .catch((err) => {
@@ -32,6 +32,22 @@ router.post("/", (req, res, next) => {
         console.error("Error while creating the car ->", err);
         next(err);
     })
+});
+
+//THIS ONE ONLY FOR ADMINS
+router.delete("/:id", (req, res, next) => {
+    const {id} = req.params;
+    Car.findByIdAndDelete(id)
+        .then((deletedCar) => {
+            if (!deletedCar) {
+                return res.status(404).json({message: "Car not found!"})
+            }
+            res.json({message: "Car successfully deleted!", deletedCar})
+        })
+        .catch((err) => {
+            console.error("Error while deleting the car ->", err);
+            next(err);
+        })
 })
 
 module.exports = router;
