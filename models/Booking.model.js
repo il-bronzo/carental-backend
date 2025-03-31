@@ -8,6 +8,7 @@ const bookingSchema = new Schema ({
         },
         message: "The end date must be after the start date!"}},
     drivingLicense: {type: String, required: true},
+    drivingLicenseExpiration: {type: Date, required: true},
     car: {type: Schema.Types.ObjectId, ref: "Car", required: true},
     user: {type: Schema.Types.ObjectId, ref: "User", required: true}
 }, {timestamps: true});
