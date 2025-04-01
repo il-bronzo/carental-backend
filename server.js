@@ -12,6 +12,8 @@ app.use("/api/cars", carRoutes)
 const bookingRoutes = require("./routes/booking.routes");
 app.use("/api/bookings", bookingRoutes)
 
+const authRoutes = require("./routes/auth.routes");
+app.use("/api/auth", authRoutes);
 
 app.get("/", (req, res) => {
     res.send("Server is ready")
