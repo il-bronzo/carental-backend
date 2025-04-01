@@ -30,20 +30,22 @@ function checkBookingConflicts(req, res, next) {
         endDate: {$gte: startDate}
     })
     .then(userConflict => {
-        if(userConflict) {
-            return res.status(400).json({message: "You already have a reservation in this period!"});
-        }
-        return Booking.findOne({
-            car, 
-            startDate: {$lte: endDate}, 
-            endDate: {$gte: startDate}
-        });
-    })
-    .then(carConflict => {
-        if(carConflict) {
-            return res.status(400).json({message: "The care is already reserved for this period!"})
-        }
-        next();
+        if(userConflict) { 
+            res.status(400).json({message: "You already have a reservation in this period!"});
+        } else { 
+            Booking.findOne({
+                car, 
+                startDate: {$lte: endDate}, 
+                endDate: {$gte: startDate}
+            })
+            .then(carConflict => {
+                if(carConflict) {
+                    res.status(400).json({message: "The care is already reserved for this period!"})
+                } else {
+                    next();
+                }
+            });
+        } 
     })
     .catch((err) => {
         next(err);
