@@ -16,5 +16,10 @@ app.use("/api/bookings", bookingRoutes)
 app.get("/", (req, res) => {
     res.send("Server is ready")
 })
+app.get("/test-error-500", (req, res, next) => {
+    next(new Error("SImulated error!")); 
+});
+
+require("./middleware/errorHandler")(app)
 
 app.listen(PORT, () => console.log(`Listening on port http://localhost:${PORT}`))
