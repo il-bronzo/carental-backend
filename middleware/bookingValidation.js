@@ -1,4 +1,5 @@
 const Booking = require ("../models/Booking.model.js");
+const Car = require("../models/Car.model");
 
 function validateDates(req, res, next) {
     const { startDate, endDate} = req.body;
@@ -19,34 +20,42 @@ function validateDrivingLicense (req, res, next) {
 }
 
 function checkBookingConflicts(req, res, next) {
-    const {startDate, endDate, user, car} = req.body;
-
+    const { startDate, endDate, car } = req.body;
+    const userId = req.payload._id;
+  
     Booking.findOne({
-        user, 
-        startDate: {$lte: endDate}, 
-        endDate: {$gte: startDate}
+      user: userId,
+      startDate: {$lte: endDate},
+      endDate: {$gte: startDate}
     })
     .then(userConflict => {
-        if(userConflict) { 
-            return res.status(400).json({message: "You already have a reservation in this period!"});
-        } else { 
-            Booking.findOne({
-                car, 
-                startDate: {$lte: endDate}, 
-                endDate: {$gte: startDate}
-            })
-            .then(carConflict => {
-                if(carConflict) {
-                    return res.status(400).json({message: "The care is already reserved for this period!"})
+      if (userConflict) {
+        res.status(400).json({message: "You already have a reservation in this period!"});
+      } else {
+        Car.findById(car)
+          .then(foundCar => {
+            if (!foundCar) {
+              res.status(404).json({ message: "Car not found!" });
+            } else {
+              Booking.countDocuments({
+                car: foundCar._id,
+                startDate: { $lte: endDate },
+                endDate: { $gte: startDate }
+              })
+              .then(count => {
+                if (count >= foundCar.stock) {
+                  res.status(400).json({message: `No available ${foundCar.brand} ${foundCar.model} cars in this period!`});
                 } else {
-                    next();
+                  next();
                 }
-            });
-        } 
+              })
+              .catch(err => next(err));
+            }
+          })
+          .catch(err => next(err));
+      }
     })
-    .catch((err) => {
-        next(err);
-    })
-}
+    .catch(err => next(err));
+  }
 
 module.exports = {validateDates, validateDrivingLicense, checkBookingConflicts};
